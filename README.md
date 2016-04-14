@@ -2,7 +2,6 @@
 Simple input manager for Unity.
 
 by doomtrinity
-//================================================================================
 
 This is a simple input manager that allows you to bind input keys to specific actions ( virtual keys ) at runtime - while playing.
 

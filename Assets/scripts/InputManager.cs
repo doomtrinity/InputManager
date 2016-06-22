@@ -96,6 +96,7 @@ namespace DT.InputManagement {
 		// =================================================================================================
 		// LoadDefaultBinds
 
+		// Add all possible button binds, pay attention to use allowed physical key only.
 		public static void LoadDefaultBinds() {
 			if (keyBinds != null) {
 				keyBinds.Clear ();
@@ -130,6 +131,7 @@ namespace DT.InputManagement {
 
 				// This will be used to clear the possible action code that holds the keycode we want to assign to this action code.
 				ActionCode bindToReset = ActionCode.None; 
+				bool reset_old_bind = false;
 
 				if (keyBinds.ContainsValue (keycode)) {
 					// Theoretically, we should have only one duplicated keycode at this point, 
@@ -138,11 +140,14 @@ namespace DT.InputManagement {
 						if (btn.Value == keycode) {
 							// We cannot change the dictionary while looping in it so we need to take the reference of the previously assigned key.
 							bindToReset = btn.Key;
+							reset_old_bind = true;
 							break;
 						}
 					}
 				}
-				keyBinds [bindToReset] = KeyCode.None; // clear the action code that was using the keycode we want to set in this action code.
+				if(reset_old_bind) {
+					keyBinds [bindToReset] = KeyCode.None; // clear the action code that was using the keycode we want to set in this action code.
+				}
 				keyBinds [actionCode] = keycode; // bind the physical key code to the action code.
 			} else {
 				Debug.LogError (string.Format ("InputManager.SetActionKey: Action code '{0}' not managed by the input manager!", actionCode.ToString() ));
@@ -166,8 +171,17 @@ namespace DT.InputManagement {
 
 		// Similar to Unity Input.GetKey
 		public static bool GetKey(ActionCode actionCode) {
-			
+
 			return Input.GetKey (GetActionKey (actionCode));
+		}
+
+		// =================================================================================================
+		// GetKeyUp
+
+		// Similar to Unity Input.GetKeyUp
+		public static bool GetKeyUp(ActionCode actionCode) {
+
+			return Input.GetKeyUp (GetActionKey (actionCode));
 		}
 
 		// =================================================================================================
@@ -194,11 +208,12 @@ namespace DT.InputManagement {
 		// Set 'None' to all action codes in keyBinds except escape.
 		public static void UnbindAll() {
 			if (keyBinds != null) {
-				for (int i = 0; i < keyBinds.Count; i++) {
-					if ( (ActionCode)i != ActionCode.Escape ) {
-						keyBinds [(ActionCode)i] = KeyCode.None;
-					}
+				Dictionary<ActionCode,KeyCode> keyBinds_tmp = new Dictionary<ActionCode, KeyCode> ();
+				foreach (KeyValuePair<ActionCode,KeyCode> bind in keyBinds) {
+					KeyCode val = (bind.Key == ActionCode.Escape) ? bind.Value : KeyCode.None;
+					keyBinds_tmp.Add (bind.Key, val);
 				}
+				keyBinds = keyBinds_tmp;
 			}
 		}
 
@@ -206,4 +221,3 @@ namespace DT.InputManagement {
 
 	}
 }
-
